@@ -1,0 +1,20 @@
+import mongoose from "mongoose";
+
+const noteSchema = new mongoose.Schema(
+  {
+    courseName: { type: String, required: true },
+    moduleNumber: { type: Number, required: true },
+
+    fileUrl: { type: String, required: true },
+    // supabaseId: { type: String, required: true },
+
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Note", noteSchema);
