@@ -1,5 +1,4 @@
 import express from "express";
-import axios from "axios";
 import cors from "cors";
 import { connectDB } from "./db.js";
 import dotenv from "dotenv";
@@ -40,4 +39,5 @@ app.use("/api/resources",auth, resourceRoutes);
 
 
 // Start the server
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+export default app;

@@ -23,6 +23,7 @@ export const getTranscribe = async (req, res) => {
 
     if (!req.file) {
       // console.log("helooo");
+      // console.log(req.file);
       return res.status(400).json({ error: "No audio file uploaded" });
     }
 
