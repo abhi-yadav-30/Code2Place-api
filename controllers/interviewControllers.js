@@ -5,7 +5,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 import User from "../models/userSchema.js";
 import mongoose from "mongoose";
-import logger from "../config/logger.js";
+// import logger from "../config/logger.js";
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ const interviewConfig = {
 
 export const getTranscribe = async (req, res) => {
   try {
-    logger.info("POST /transcribe by %s", req.userId || "unknown");
+    // logger.info("POST /transcribe by %s", req.userId || "unknown");
 
     if (!req.file) {
       // console.log("helooo");
@@ -27,7 +27,7 @@ export const getTranscribe = async (req, res) => {
       return res.status(400).json({ error: "No audio file uploaded" });
     }
 
-    logger.debug("File saved as: %s", req.file.filename);
+    // logger.debug("File saved as: %s", req.file.filename);
 
     const file = fsSync.createReadStream(req.file.path);
     // console.log(file);
@@ -38,21 +38,24 @@ export const getTranscribe = async (req, res) => {
     try {
       console.log(req.file.path);
       await fs.promises.unlink(req.file.path);
-      logger.debug("Deleted uploaded file %s", req.file.path);
+      // logger.debug("Deleted uploaded file %s", req.file.path);
     } catch (err) {
-      logger.warn("Failed to delete file %s: %s", req.file.path, err.message);
+      console.log(err)
+      // logger.warn("Failed to delete file %s: %s", req.file.path, err.message);
     }
 
     // console.log(result.text);
     res.json({ text: result.text });
   } catch (err) {
-    logger.error("Transcribe error: %s", err.message);
+    console.log(err);
+    // logger.error("Transcribe error: %s", err.message);
     // try to cleanup file if exists
     if (req.file && fsSync.existsSync(req.file.path)) {
       try {
         await fs.unlink(req.file.path);
       } catch (e) {
-        logger.warn("Cleanup fail");
+        console.log(e);
+        // logger.warn("Cleanup fail");
       }
     }
     return res
@@ -134,7 +137,8 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
 
     const raw = completion?.choices?.[0]?.message?.content;
     if (!raw) {
-      logger.error("Empty AI response for user %s", userId);
+      console.log("AI returned empty response");
+      // logger.error("Empty AI response for user %s", userId);
       return res.status(502).json({ error: "AI returned empty response" });
     }
 
@@ -148,11 +152,12 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
       const jsonString = raw.substring(firstBrace, lastBrace + 1);
       parsed = JSON.parse(jsonString);
     } catch (err) {
-      logger.error(
-        "Failed to parse AI JSON: %s -- raw: %s",
-        err.message,
-        raw.slice(0, 200)
-      );
+      // logger.error(
+      //   "Failed to parse AI JSON: %s -- raw: %s",
+      //   err.message,
+      //   raw.slice(0, 200)
+      // );
+      console.log(err)
       return res.status(500).json({ error: "Invalid AI response format" });
     }
 
@@ -171,14 +176,14 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
       }
     );
 
-    if (updateRes.matchedCount === 0) {
-      logger.warn(
-        "User/session not found for push: user=%s session=%s",
-        userId,
-        sessionId
-      );
-      // still return AI's suggestion so frontend isn't blocked
-    }
+    // if (updateRes.matchedCount === 0) {
+    //   logger.warn(
+    //     "User/session not found for push: user=%s session=%s",
+    //     userId,
+    //     sessionId
+    //   );
+    //   // still return AI's suggestion so frontend isn't blocked
+    // }
 
     res.json({
       nextQuestion: parsed.nextQuestion,
@@ -207,7 +212,8 @@ export const startInterview = async (req, res) => {
 
     res.json({ sessionId: session._id });
   } catch (err) {
-    logger.error("startInterview error: %s", err.message);
+    console.log(err)
+    // logger.error("startInterview error: %s", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -228,7 +234,8 @@ export const endInterview = async (req, res) => {
 
     return res.json({ msg: "interview ended" });
   } catch (err) {
-    logger.error("endInterview error: %s", err.message);
+    console.log(err)
+    // logger.error("endInterview error: %s", err.message);
     return res.json({ error: err });
   }
 };
@@ -246,7 +253,8 @@ export const getTranscriptionById = async (req, res) => {
 
     res.json({ session: user.interviewTranscriptions[0] });
   } catch (err) {
-    logger.error("getTranscriptionById error: %s", err.message);
+    console.log(err);
+    // logger.error("getTranscriptionById error: %s", err.message);
     return res.status(500).json({ error: err.message });
   }
 };
@@ -265,7 +273,8 @@ export const getAllTranscriptions = async (req, res) => {
 
     res.json({ sessions });
   } catch (err) {
-    logger.error("getAllTranscriptions error: %s", err.message);
+    console.log(err)
+    // logger.error("getAllTranscriptions error: %s", err.message);
     res.status(500).json({ error: "Server error" });
   }
 };
