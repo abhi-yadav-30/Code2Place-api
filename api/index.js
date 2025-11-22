@@ -18,13 +18,22 @@ const app = express();
 const PORT = 5000;
 connectDB();
 // Middleware
+
+let domain = ""
+if (process.env.NODE_ENV == "development") {
+  domain = "http://localhost:5000";
+} else {
+  domain =
+    "https://code2place.vercel.app/";
+}
 app.use(cookieParser());
 app.use(
   cors({
-    origin: true,
+    origin: domain,
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
