@@ -23,8 +23,7 @@ let domain = ""
 if (process.env.NODE_ENV == "development") {
   domain = "http://localhost:5000";
 } else {
-  domain =
-    "https://code2place.vercel.app/";
+  domain = "https://code2place.vercel.app";
 }
 app.use(cookieParser());
 app.use(
