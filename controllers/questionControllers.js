@@ -1,4 +1,3 @@
-import axios from "axios";
 import { JUDGE0_URL } from "../constants.js";
 import Question from "../models/questionSchema.js";
 import { createSubmission } from "./submissionContollers.js";
@@ -26,17 +25,23 @@ export const runCode = async (req, res) => {
         try {
           // Send code to Judge0
           // console.log("hereee")
-          const response = await axios.post(
+          const response = await fetch(
             `${JUDGE0_URL}?base64_encoded=false&wait=true`,
             {
-              source_code,
-              language_id: language?.judge,
-              stdin: test.input,
-            },
-            { headers: { "Content-Type": "application/json" } }
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                source_code,
+                language_id: language?.judge,
+                stdin: test.input,
+              }),
+            }
           );
 
-          const data = response.data;
+          const data = await response.json();
+
           const compileErr = data.compile_output?.trim();
           const runtimeErr = data.stderr?.trim();
 
@@ -232,17 +237,23 @@ export const submitCode = async (req, res) => {
 
   for (const test of question.testCases) {
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${JUDGE0_URL}?base64_encoded=false&wait=true`,
         {
-          source_code,
-          language_id: language?.judge,
-          stdin: test.input,
-        },
-        { headers: { "Content-Type": "application/json" } }
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            source_code,
+            language_id: language?.judge,
+            stdin: test.input,
+          }),
+        }
       );
 
-      const data = response.data;
+      const data = await response.json();
+;
 
       const compileErr = data.compile_output?.trim();
       const runtimeErr = data.stderr?.trim();
