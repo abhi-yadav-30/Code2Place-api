@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-  
     const { name, username, email, password } = req.body;
 
     if (!name || !password || !email || !username)
@@ -27,15 +26,15 @@ export const register = async (req, res) => {
       password: hashed,
     });
 
-    res.status(201).json({ msg: "User registered"});
+    res.status(201).json({ msg: "User registered" });
   } catch (err) {
-    res.status(500).json({ msg: err.message});
+    res.status(500).json({ msg: err.message });
   }
 };
 
 export const login = async (req, res) => {
   try {
-    // console.log("helo")
+    // console.log("helo");
     const { email, password } = req.body;
     console.log(email);
     const user = await User.findOne({ email });
@@ -56,7 +55,6 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-
     res.json({
       msg: "Login successful",
       user: {
@@ -71,11 +69,10 @@ export const login = async (req, res) => {
   }
 };
 
-
 export const logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     secure: process.env.NODE_ENV === "production",
   });
 

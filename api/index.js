@@ -18,20 +18,28 @@ const app = express();
 const PORT = 5000;
 connectDB();
 // Middleware
-
-let domain = ""
-if (process.env.NODE_ENV == "development") {
-  domain = "http://localhost:5000";
-} else {
-  domain = "https://code2place.vercel.app";
-}
 app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://code2place.vercel.app",
+  "http://192.168.1.37:5173",
+];
+
 app.use(
   cors({
-    origin: domain,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        console.log(origin);
+        callback(null, true);
+      } else {
+        console.log("CORS blocked: " + origin);
+        callback(new Error("CORS blocked: " + origin));
+      }
+    },
     credentials: true,
   })
 );
+
 
 
 app.use(express.json());
