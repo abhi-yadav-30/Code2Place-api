@@ -68,7 +68,7 @@ export const getQuestion = async (req, res) => {
   try {
     // console.log("hiii.");
 
-    const { answer, prvQuestion, userId, sessionId, role, round, difficulty } =
+    const { answer, prvQuestion,prvAns, userId, sessionId, role, round, difficulty,jd } =
       req.body;
     if (
       !answer ||
@@ -93,46 +93,93 @@ export const getQuestion = async (req, res) => {
 
     // console.log({role,round,difficulty});
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant", // FREE MODEL
-      messages: [
-        {
-          role: "system",
-          content: `
+//     const completion = await groq.chat.completions.create({
+//       model: "llama-3.1-8b-instant", // FREE MODEL
+//       messages: [
+//         {
+//           role: "system",
+//           content: `
+// You are an AI Interview Simulator.
+
+// Your job:
+// 1. Give short feedback (1–2 lines) ONLY about the user's previous answer. This feedback must mention:
+//    - positive point only if the answer was good or relevant.
+//    - One improvement point if needed.
+// 2. Give detailed, in-depth feedback explaining how the user can improve overall.
+// 3. Generate the next interview question.
+
+// Base everything on:
+// - Role: ${role}
+// - Round: ${round}
+// - Difficulty: ${difficulty}
+// - Job discription : ${jd}
+
+// IMPORTANT RULES:
+// - You MUST return ONLY a valid JSON object.
+// - No explanations, no markdown, no text outside JSON.
+// - JSON format (STRICT):
+
+// {
+//   "nextQuestion": "string",
+//   "shortFeedback": "string",
+//   "detailedFeedback": "string"
+// }
+
+// If you cannot follow the instructions, return a JSON object with an "error" field.
+// `,
+//         },
+//         {
+//           role: "user",
+//           content: `The candidate answered: ${answer}. Evaluate and produce JSON.`,
+//         },
+//       ],
+//     });
+
+const completion = await groq.chat.completions.create({
+  model: "llama-3.1-8b-instant",
+  messages: [
+    {
+      role: "system",
+      content: `
 You are an AI Interview Simulator.
 
-Your job:
-1. Give short feedback (1–2 lines) ONLY about the user's previous answer. This feedback must mention:
-   - positive point only if the answer was good or relevant.
-   - One improvement point if needed.
-2. Give detailed, in-depth feedback explaining how the user can improve overall.
-3. Generate the next interview question.
+Your tasks for every interaction:
 
-Base everything on:
-- Role: ${role}
-- Round: ${round}
-- Difficulty: ${difficulty}
+1. Evaluate the user's previous answer.
+2. Provide short feedback (1–2 lines) that includes:
+   - A positive point (only if the answer was good or relevant).
+   - One improvement point (if needed).
+3. Provide detailed feedback explaining how the user can improve overall.
+4. Generate the next interview question based on:
+   - Role: ${role}
+   - Round: ${round}
+   - Difficulty: ${difficulty}
+   - Job Description: ${jd}
+5. Provide the correct answer for the next question, written clearly but concisely.
 
-IMPORTANT RULES:
+STRICT OUTPUT RULES:
 - You MUST return ONLY a valid JSON object.
-- No explanations, no markdown, no text outside JSON.
+- No markdown, no explanations, no commentary outside JSON.
 - JSON format (STRICT):
 
 {
   "nextQuestion": "string",
+  "correctAnswer": "string",
   "shortFeedback": "string",
-  "detailedFeedback": "string"
+  "detailedFeedback": "string"
 }
 
-If you cannot follow the instructions, return a JSON object with an "error" field.
+If you cannot follow the instructions, return:
+{ "error": "Invalid output. Format not followed." }
 `,
-        },
-        {
-          role: "user",
-          content: `The candidate answered: ${answer}. Evaluate and produce JSON.`,
-        },
-      ],
-    });
+    },
+    {
+      role: "user",
+      content: `The candidate answered: ${answer}. Evaluate and produce JSON.`,
+    },
+  ],
+});
+
     // console.log(completion.choices[0].message.content.);
 
     const raw = completion?.choices?.[0]?.message?.content;
@@ -151,6 +198,7 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
         throw new Error("No JSON found");
       const jsonString = raw.substring(firstBrace, lastBrace + 1);
       parsed = JSON.parse(jsonString);
+      console.log(parsed);
     } catch (err) {
       // logger.error(
       //   "Failed to parse AI JSON: %s -- raw: %s",
@@ -169,6 +217,7 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
         $push: {
           "interviewTranscriptions.$.transcription": {
             question: prvQuestion,
+            generatedAnswer:prvAns,
             answer,
             feedback: parsed.detailedFeedback,
           },
@@ -187,6 +236,7 @@ If you cannot follow the instructions, return a JSON object with an "error" fiel
 
     res.json({
       nextQuestion: parsed.nextQuestion,
+      correctAnswer:parsed.correctAnswer,
       shortFeedback: parsed.shortFeedback,
     });
   } catch (err) {
