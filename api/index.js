@@ -45,9 +45,10 @@ app.use(
 
 app.use(express.json());
 
-app.get("/",(req,res)=>{
-    res.send("correct");
-})
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "ok", message: "backend running" });
+});
+
 
 app.use("/api/question", auth, questionRoutes);
 app.use("/api/auth", authRoutes);
