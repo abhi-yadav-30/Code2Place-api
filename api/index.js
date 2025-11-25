@@ -16,7 +16,7 @@ dotenv.config();
 
 const app = express();
 const PORT = 5000;
-connectDB();
+// connectDB();
 // Middleware
 app.use(cookieParser());
 const allowedOrigins = [
