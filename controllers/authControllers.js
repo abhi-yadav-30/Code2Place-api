@@ -69,6 +69,68 @@ export const login = async (req, res) => {
   }
 };
 
+
+
+
+// import User from "../models/userSchema.js";
+// import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// GOOGLE LOGIN
+export const googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+
+    // Check user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Auto-create user
+      user = await User.create({
+        name,
+        username: email.split("@")[0],
+        email,
+        password: "google_oauth", // dummy
+        // avatar: picture,
+      });
+    }
+
+    // create JWT
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
+
+    res.json({
+      msg: "Google Login success",
+      user: {
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        userId: user._id,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "Google login failed" });
+  }
+};
+
 export const logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
