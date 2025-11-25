@@ -23,6 +23,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://code2place.vercel.app",
   "http://192.168.1.37:5173",
+  "https://web-production-40588.up.railway.app",
 ];
 
 app.use(
