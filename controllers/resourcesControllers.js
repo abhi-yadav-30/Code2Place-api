@@ -90,6 +90,7 @@ import { supabase } from "../supabase.js";
 
 export const uploadNote = async (req, res) => {
   try {
+    
     if (!req.file)
       return res.status(400).json({ error: "PDF file is required" });
 
