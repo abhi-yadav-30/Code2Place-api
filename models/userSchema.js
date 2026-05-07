@@ -43,9 +43,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     interviewScore: { type: Number, default: 0 },
-    isVerified: { type: Boolean, default: false },
-    otp: { type: String },
-    otpExpires: { type: Date },
+
   },
   { timestamps: true }
 );
