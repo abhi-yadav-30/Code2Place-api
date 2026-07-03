@@ -248,6 +248,24 @@ export const startInterview = async (req, res) => {
     const { userId } = req.body;
     console.log(userId);
 
+    // ── Subscription Guard ─────────────────────────────────────────────────
+    const userCheck = await User.findById(userId).select("isPro subscriptionExpiresAt");
+    if (!userCheck) return res.status(404).json({ error: "User not found" });
+
+    const now = new Date();
+    const isActive =
+      userCheck.isPro &&
+      userCheck.subscriptionExpiresAt &&
+      userCheck.subscriptionExpiresAt > now;
+
+    if (!isActive) {
+      return res.status(403).json({
+        error: "subscription_required",
+        message: "AI Interview requires an active Pro subscription.",
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
     const session = {
       _id: new mongoose.Types.ObjectId(),
       duration: null,

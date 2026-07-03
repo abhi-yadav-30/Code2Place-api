@@ -2,7 +2,7 @@
 
 import Note from "../models/notesSchema.js";
 import User from "../models/userSchema.js";
-
+import { supabase } from "../supabase.js";
 
 // GET: /notes/courses
 
@@ -12,10 +12,29 @@ export const uploadNote = async (req, res) => {
     if (!req.file)
       return res.status(400).json({ error: "PDF file is required" });
 
+    const file = req.file;
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const fileName = `college-notes/${file.fieldname}-${uniqueSuffix}-${safeOriginalName}`;
+// console.log(fileName);
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("resources")
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+console.log(fileName);
+    const { data: publicUrlData } = supabase.storage
+      .from("resources")
+      .getPublicUrl(fileName);
+// console.log(fileName);
     const note = await Note.create({
       courseName: req.body.courseName,
       moduleNumber: req.body.moduleNumber,
-      fileUrl: `/uploads/${req.file.filename}`,
+      fileUrl: publicUrlData.publicUrl,
       uploadedBy: req.userId,
     });
 

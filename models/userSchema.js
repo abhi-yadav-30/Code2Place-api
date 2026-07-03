@@ -44,6 +44,23 @@ const userSchema = new mongoose.Schema(
     ],
     interviewScore: { type: Number, default: 0 },
 
+    // ── Subscription ──────────────────────────────────────────────────────
+    isPro: { type: Boolean, default: false },
+    plan: {
+      type: String,
+      enum: ["free", "monthly", "annual"],
+      default: "free",
+    },
+    subscriptionExpiresAt: { type: Date, default: null },
+    paymentHistory: [
+      {
+        plan: { type: String },
+        amount: { type: Number },
+        currency: { type: String, default: "INR" },
+        txnId: { type: String },
+        paidAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

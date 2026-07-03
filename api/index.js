@@ -11,6 +11,7 @@ import userRoutes from "../routes/userRoutes.js";
 import submissionRoutes from "../routes/submissionRoutes.js";
 import interviewRoutes from "../routes/interviewRoutes.js";
 import resourceRoutes from "../routes/resourcesRoutes.js";
+import subscriptionRoutes from "../routes/subscriptionRoutes.js";
 import { auth } from "../middlewares.js";
 // import submissionRoutes from "./routes/submissionRoutes.js";
 
@@ -57,6 +58,7 @@ app.use("/api/user", auth, userRoutes);
 app.use("/api/submission", auth, submissionRoutes);
 app.use("/api/interview", auth, interviewRoutes);
 app.use("/api/resources", auth, resourceRoutes);
+app.use("/api/subscription", auth, subscriptionRoutes);
 
 // Start the server
 // app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
